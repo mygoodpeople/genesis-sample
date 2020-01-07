@@ -199,3 +199,79 @@ function genesis_sample_comments_gravatar( $args ) {
 	return $args;
 
 }
+
+// Apply Full Width Content layout to Posts page, Single Posts and Archives.
+add_action( 'get_header', 'genesis_sample_set_full_layout' );
+function genesis_sample_set_full_layout() {
+	if ( ! ( is_singular( 'post' ) || is_archive() ) ) {
+		return;
+	}
+	// Force full width content
+	add_filter( 'genesis_pre_get_option_site_layout', '__genesis_return_full_width_content' );
+}
+
+
+/* Add next/previous post links on single posts
+----------------------------------------------------------------------------------------*/
+function genesis_sample_prev_next_post_nav() {
+	if ( is_singular( 'post' ) ) {
+		echo '<div class="single-post-nav">';
+			previous_post_link( '<div class="previous-post-title">%link</div>', '%title' );
+			next_post_link( '<div class="next-post-title">%link</div>', '%title' );
+		echo '</div>';
+	}
+}
+add_action( 'genesis_entry_footer', 'genesis_sample_prev_next_post_nav' );
+
+/* Customize the post meta function
+----------------------------------------------------------------------------------------*/
+add_filter( 'genesis_post_meta', 'genesis_sample_post_meta_filter' );
+function genesis_sample_post_meta_filter($post_meta) {
+if ( !is_page() && !is_home() && !is_front_page() && !is_archive()) {
+    $post_meta = '[post_categories before="Filed Under: "] [post_tags before="Tagged: "]';
+	return $post_meta;
+}}
+
+/* Customize read more text
+----------------------------------------------------------------------------------------*/
+add_filter( 'excerpt_more', 'genesis_read_more_link' );
+add_filter( 'get_the_content_more_link', 'genesis_read_more_link' );
+add_filter( 'the_content_more_link', 'genesis_read_more_link' );
+function genesis_read_more_link() {
+
+	return '<p><a class="more-link" href="' . get_permalink() . '">Continue Reading</a></p>';
+
+}
+
+/* Remove Comma (,) Between Categories and Tags
+----------------------------------------------------------------------------------------*/
+add_filter('genesis_post_meta', 'genesis_sample_post_meta');
+
+function genesis_sample_post_meta($post_meta)
+{
+	if (!is_page() && !is_home() && !is_front_page() && !is_archive() && !is_search()) {
+		$post_meta = '[post_categories before="" sep=""] [post_tags before="" sep=""]';
+		return $post_meta;
+	}
+}
+
+//* Customize the author box title
+add_filter( 'genesis_author_box_title', 'custom_author_box_title' );
+function custom_author_box_title() {
+	return '<strong>Meet Ikhwan</strong>';
+}
+
+//* Disable the superfish script
+add_action( 'wp_enqueue_scripts', 'sp_disable_superfish' );
+function sp_disable_superfish() {
+	wp_deregister_script( 'superfish' );
+	wp_deregister_script( 'superfish-args' );
+}
+
+//* Remove Skip Links from a template
+remove_action ( 'genesis_before_header', 'genesis_skip_links', 5 );
+//* Dequeue Skip Links Script
+add_action( 'wp_enqueue_scripts','child_dequeue_skip_links' );
+function child_dequeue_skip_links() {
+	wp_dequeue_script( 'skip-links' );
+}
